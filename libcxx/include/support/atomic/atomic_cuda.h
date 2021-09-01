@@ -232,6 +232,7 @@ __host__ __device__
             return __atomic_load_n_cuda(__cxx_get_underlying_device_atomic(__a), __order, __scope_tag<_Sco>());
         ),
         NV_IS_HOST, (
+            printf("In __cxx_atomic_load()\r\n");
             return __host::__cxx_atomic_load(&__a->__a_value, __order);
         )
     )

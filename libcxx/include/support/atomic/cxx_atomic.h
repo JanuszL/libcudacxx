@@ -55,10 +55,10 @@ struct __cxx_atomic_ref_base_impl {
   static constexpr int __sco = _Sco;
 
   _LIBCUDACXX_CONSTEXPR
-  __cxx_atomic_ref_base_impl() _NOEXCEPT = default;
+  __cxx_atomic_ref_base_impl() _NOEXCEPT = delete;
 
   _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
-  __cxx_atomic_ref_base_impl(_Tp value) _NOEXCEPT : __a_value(value) {}
+  __cxx_atomic_ref_base_impl(_Tp& value) _NOEXCEPT : __a_value(&value) {}
 
   _Tp* __a_value;
 };
@@ -88,7 +88,8 @@ const volatile _Tp* __cxx_get_underlying_atomic(__cxx_atomic_ref_base_impl<_Tp, 
 }
 
 template <typename _Tp>
-_LIBCUDACXX_INLINE_VISIBILITY auto __cxx_atomic_base_unwrap(_Tp* __a) _NOEXCEPT -> decltype(__cxx_get_underlying_atomic(__a)) {
+_LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
+auto __cxx_atomic_base_unwrap(_Tp* __a) _NOEXCEPT -> decltype(__cxx_get_underlying_atomic(__a)) {
   return __cxx_get_underlying_atomic(__a);
 }
 

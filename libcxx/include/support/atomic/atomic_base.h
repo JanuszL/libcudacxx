@@ -172,4 +172,143 @@ inline constexpr
   #endif
 }
 
+// __cxx_atomic_ref_base_impl
+
+template <typename _Tp, int _Sco>
+inline void __cxx_atomic_store(__cxx_atomic_ref_base_impl<_Tp, _Sco>* __a,  _Tp __val,
+                        memory_order __order) {
+  __atomic_store(__cxx_get_underlying_atomic(__a), &__val, __cxx_atomic_order_to_int(__order));
+}
+template <typename _Tp, int _Sco>
+inline void __cxx_atomic_store(volatile __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a,  _Tp __val,
+                        memory_order __order) {
+  __atomic_store(__cxx_get_underlying_atomic(__a), &__val, __cxx_atomic_order_to_int(__order));
+}
+
+template <typename _Tp, int _Sco>
+inline _Tp __cxx_atomic_load(const __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a,
+                       memory_order __order) {
+  _Tp __ret;
+  __atomic_load(__cxx_get_underlying_atomic(__a), &__ret, __cxx_atomic_order_to_int(__order));
+  return __ret;
+}
+template <typename _Tp, int _Sco>
+inline _Tp __cxx_atomic_load(const volatile __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a,
+                       memory_order __order) {
+  _Tp __ret;
+  __atomic_load(__cxx_get_underlying_atomic(__a), &__ret, __cxx_atomic_order_to_int(__order));
+  return __ret;
+}
+
+template <typename _Tp, int _Sco>
+inline _Tp __cxx_atomic_exchange(__cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp __value,
+                          memory_order __order) {
+  _Tp __ret;
+  __atomic_exchange(__cxx_get_underlying_atomic(__a), &__value, &__ret, __cxx_atomic_order_to_int(__order));
+  return __ret;
+}
+template <typename _Tp, int _Sco>
+inline _Tp __cxx_atomic_exchange(volatile __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp __value,
+                          memory_order __order) {
+  _Tp __ret;
+  __atomic_exchange(__cxx_get_underlying_atomic(__a), &__value, &__ret, __cxx_atomic_order_to_int(__order));
+  return __ret;
+}
+
+template <typename _Tp, int _Sco>
+inline bool __cxx_atomic_compare_exchange_strong(
+    __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp* __expected,
+    _Tp __value, memory_order __success, memory_order __failure) {
+  (void)__expected;
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a), __expected, &__value,
+                                   false,
+                                   __cxx_atomic_order_to_int(__success),
+                                   __cxx_atomic_failure_order_to_int(__failure));
+}
+template <typename _Tp, int _Sco>
+inline bool __cxx_atomic_compare_exchange_strong(
+    volatile __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp* __expected,
+    _Tp __value, memory_order __success, memory_order __failure) {
+  (void)__expected;
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a), __expected, &__value,
+                                   false,
+                                   __cxx_atomic_order_to_int(__success),
+                                   __cxx_atomic_failure_order_to_int(__failure));
+}
+
+template <typename _Tp, int _Sco>
+inline bool __cxx_atomic_compare_exchange_weak(
+    __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp* __expected,
+    _Tp __value, memory_order __success, memory_order __failure) {
+  (void)__expected;
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a), __expected, &__value,
+                                   true,
+                                   __cxx_atomic_order_to_int(__success),
+                                   __cxx_atomic_failure_order_to_int(__failure));
+}
+template <typename _Tp, int _Sco>
+inline bool __cxx_atomic_compare_exchange_weak(
+    volatile __cxx_atomic_ref_base_impl<_Tp, _Sco>* __a, _Tp* __expected,
+    _Tp __value, memory_order __success, memory_order __failure) {
+  (void)__expected;
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a), __expected, &__value,
+                                   true,
+                                   __cxx_atomic_order_to_int(__success),
+                                   __cxx_atomic_failure_order_to_int(__failure));
+}
+/*
+template <typename _Tp>
+struct __atomic_ptr_inc { enum {value = 1}; };
+
+template <typename _Tp>
+struct __atomic_ptr_inc<_Tp*> { enum {value = sizeof(_Tp)}; };
+
+// FIXME: Haven't figured out what the spec says about using arrays with
+// atomic_fetch_add. Force a failure rather than creating bad behavior.
+template <typename _Tp>
+struct __atomic_ptr_inc<_Tp[]> { };
+template <typename _Tp, int n>
+struct __atomic_ptr_inc<_Tp[n]> { };
+
+template <typename _Tp, typename _Td>
+inline auto __cxx_atomic_fetch_add(_Tp* __a, _Td __delta,
+                           memory_order __order) -> __cxx_atomic_underlying_t<_Tp> {
+  constexpr auto __skip_v = __atomic_ptr_inc<__cxx_atomic_underlying_t<_Tp>>::value;
+  auto __a_tmp = __cxx_atomic_base_unwrap(__a);
+  return __atomic_fetch_add(__a_tmp, __delta * __skip_v,
+                            __cxx_atomic_order_to_int(__order));
+}
+
+template <typename _Tp, typename _Td>
+inline auto __cxx_atomic_fetch_sub(_Tp* __a, _Td __delta,
+                           memory_order __order) -> __cxx_atomic_underlying_t<_Tp> {
+  constexpr auto __skip_v = __atomic_ptr_inc<__cxx_atomic_underlying_t<_Tp>>::value;
+  auto __a_tmp = __cxx_atomic_base_unwrap(__a);
+  return __atomic_fetch_sub(__a_tmp, __delta * __skip_v,
+                            __cxx_atomic_order_to_int(__order));
+}
+
+template <typename _Tp, typename _Td>
+inline auto __cxx_atomic_fetch_and(_Tp* __a, _Td __pattern,
+                            memory_order __order) -> __cxx_atomic_underlying_t<_Tp> {
+  auto __a_tmp = __cxx_atomic_base_unwrap(__a);
+  return __atomic_fetch_and(__a_tmp, __pattern,
+                            __cxx_atomic_order_to_int(__order));
+}
+
+template <typename _Tp, typename _Td>
+inline auto __cxx_atomic_fetch_or(_Tp* __a, _Td __pattern,
+                          memory_order __order) -> __cxx_atomic_underlying_t<_Tp> {
+  auto __a_tmp = __cxx_atomic_base_unwrap(__a);
+  return __atomic_fetch_or(__a_tmp, __pattern,
+                           __cxx_atomic_order_to_int(__order));
+}
+
+template <typename _Tp, typename _Td>
+inline auto __cxx_atomic_fetch_xor(_Tp* __a, _Td __pattern,
+                           memory_order __order) -> __cxx_atomic_underlying_t<_Tp> {
+  auto __a_tmp = __cxx_atomic_base_unwrap(__a);
+  return __atomic_fetch_xor(__a_tmp, __pattern,
+                            __cxx_atomic_order_to_int(__order));
+*/
 #endif // _LIBCUDACXX_ATOMIC_BASE_H
