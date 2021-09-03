@@ -136,21 +136,26 @@ inline
     )
 }
 
-template <typename _Tp, int _Sco, bool _Ref>
-using __cxx_atomic_base_heterogeneous_storage
-            = typename conditional<_Ref,
-                    __host::__cxx_atomic_ref_base_impl<_Tp, _Sco>,
-                    __host::__cxx_atomic_base_impl<_Tp, _Sco> >::type;
-
-
 template <typename _Tp, int _Sco, bool _Ref = false>
 struct __cxx_atomic_base_heterogeneous_impl {
     __cxx_atomic_base_heterogeneous_impl() noexcept = default;
+
     _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
       __cxx_atomic_base_heterogeneous_impl(_Tp __value) : __a_value(__value) {
     }
 
-    __cxx_atomic_base_heterogeneous_storage<_Tp, _Sco, _Ref> __a_value;
+    __host::__cxx_atomic_base_impl<_Tp, _Sco> __a_value;
+};
+
+template <typename _Tp, int _Sco>
+struct __cxx_atomic_base_heterogeneous_impl<_Tp, _Sco, true> {
+    __cxx_atomic_base_heterogeneous_impl() noexcept = default;
+
+    _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
+      __cxx_atomic_base_heterogeneous_impl(_Tp& __value) : __a_value(__value) {
+    }
+
+    __host::__cxx_atomic_ref_base_impl<_Tp, _Sco> __a_value;
 };
 
 template <typename _Tp, int _Sco, bool _Ref>
@@ -232,7 +237,6 @@ __host__ __device__
             return __atomic_load_n_cuda(__cxx_get_underlying_device_atomic(__a), __order, __scope_tag<_Sco>());
         ),
         NV_IS_HOST, (
-            printf("In __cxx_atomic_load()\r\n");
             return __host::__cxx_atomic_load(&__a->__a_value, __order);
         )
     )
