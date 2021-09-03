@@ -103,7 +103,6 @@ __host__ __device__ __noinline__
 void do_test() {
     Selector<T, constructor_initializer> sel;
     T & val = *sel.construct(T(0));
-    printf("Testing\r\n");
     assert(&val);
     assert(val == T(0));
     A obj(val);
@@ -188,12 +187,11 @@ void test_for_all_types()
 template<typename T, cuda::thread_scope Scope>
 using cuda_std_atomic_ref = cuda::std::atomic_ref<T>;
 
-// template<typename T, cuda::thread_scope Scope>
-// using cuda_atomic_ref = cuda::std::atomic_ref<T>;
+template<typename T, cuda::thread_scope Scope>
+using cuda_atomic_ref = cuda::std::atomic_ref<T>;
 
 int main(int, char**)
 {
-    printf("Testing\r\n");
     // this test would instantiate more cases than just the ones below
     // but ptxas already consumes 5 GB of RAM while translating these
     // so in the interest of not eating all memory, it's limited to the current set
@@ -205,11 +203,14 @@ int main(int, char**)
 
 #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
     test_for_all_types<cuda_std_atomic_ref, cuda::thread_scope_system, local_memory_selector>();
+    test_for_all_types<cuda_atomic_ref, cuda::thread_scope_system, local_memory_selector>();
 #endif
 #ifdef __CUDA_ARCH__
     test_for_all_types<cuda_std_atomic_ref, cuda::thread_scope_system, shared_memory_selector>();
+    test_for_all_types<cuda_atomic_ref, cuda::thread_scope_block, local_memory_selector>();
 
-    test_for_all_types<cuda_std_atomic_ref, cuda::thread_scope_system, global_memory_selector>();
+    test_for_all_types<cuda_std_atomic_ref, cuda::thread_scope_system, local_memory_selector>();
+    test_for_all_types<cuda_atomic_ref, cuda::thread_scope_device, global_memory_selector>();
 #endif
 
   return 0;
