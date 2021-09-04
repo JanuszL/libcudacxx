@@ -85,7 +85,6 @@
 //     integral operator^=(integral op) volatile;
 //     integral operator^=(integral op);
 // };
-#include <iostream>
 
 #include <cuda/std/atomic>
 #include <cuda/std/cassert>
