@@ -751,6 +751,8 @@ struct __cxx_atomic_lock_impl {
   __cxx_atomic_lock_impl(_Tp value) _NOEXCEPT
     : __a_value(value), __a_lock(0) {}
 
+  __cxx_atomic_lock_impl(const __cxx_atomic_lock_impl&) _NOEXCEPT = default;
+
   _Tp __a_value;
   mutable __cxx_atomic_base_impl<_LIBCUDACXX_ATOMIC_FLAG_TYPE, _Sco> __a_lock;
 
@@ -1051,18 +1053,16 @@ template <typename _Tp, int _Sco,
           typename _Base = __cxx_atomic_base_impl<_Tp, _Sco> >
 #endif //_LIBCUDACXX_ATOMIC_ONLY_USE_BUILTINS
 struct __cxx_atomic_impl : public _Base {
-
 #if _GNUC_VER >= 501
     static_assert(is_trivially_copyable<_Tp>::value,
       "std::atomic<Tp> requires that 'Tp' be a trivially copyable type");
 #endif
 
   __cxx_atomic_impl() _NOEXCEPT _LIBCUDACXX_DEFAULT
-  __cxx_atomic_impl(const __cxx_atomic_impl&) _NOEXCEPT _LIBCUDACXX_DEFAULT
-
-  _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
-  __cxx_atomic_impl(_Tp __v) _NOEXCEPT : _Base(__v) {}
+  _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit __cxx_atomic_impl(_Tp value) _NOEXCEPT
+    : _Base(value) {}
 };
+
 
 template<int _Sco, typename _Tp = int>
 _LIBCUDACXX_INLINE_VISIBILITY
@@ -1073,19 +1073,7 @@ __cxx_atomic_impl<_Tp, _Sco>* __cxx_atomic_rebind(_Tp* __inst) {
 }
 
 template <typename _Tp, int _Sco>
-struct __cxx_atomic_ref_impl : public __cxx_atomic_ref_base_impl<_Tp, _Sco> {
-    typedef __cxx_atomic_ref_base_impl<_Tp, _Sco> _Base;
-#if _GNUC_VER >= 501
-    static_assert(is_trivially_copyable<_Tp>::value,
-      "std::atomic<Tp> requires that 'Tp' be a trivially copyable type");
-#endif
-
-  __cxx_atomic_ref_impl() _NOEXCEPT = delete;
-  __cxx_atomic_ref_impl(const __cxx_atomic_ref_impl&) _NOEXCEPT _LIBCUDACXX_DEFAULT
-
-  _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
-  __cxx_atomic_ref_impl(_Tp& __v) _NOEXCEPT : _Base(__v) {}
-};
+using __cxx_atomic_ref_impl = __cxx_atomic_ref_base_impl<_Tp, _Sco>;
 
 #ifdef _LIBCUDACXX_HAS_NO_THREAD_CONTENTION_TABLE
 
@@ -1264,6 +1252,10 @@ struct __atomic_base_ops {
     mutable _Storage __a_;
     typedef _Storage __atomic_storage;
 
+    __atomic_base_ops() = default;
+    _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
+    __atomic_base_ops(const _Storage& __a) _NOEXCEPT : __a_(__a) {}
+
     _LIBCUDACXX_INLINE_VISIBILITY
     bool is_lock_free() const volatile _NOEXCEPT
         {return __cxx_atomic_is_lock_free(sizeof(_Tp));}
@@ -1374,6 +1366,11 @@ struct __atomic_base_ops {
 // atomic/atomic_ref<integral>
 template <class _Tp, bool _Ref, int _Sco, class _Storage>
 struct __atomic_base_ops<_Tp, _Ref, _Sco, _Storage, true> : public __atomic_base_ops<_Tp, _Ref, _Sco, _Storage, false> {
+    __atomic_base_ops() = default;
+
+    _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
+    __atomic_base_ops(const _Storage& __a) _NOEXCEPT : __atomic_base_ops<_Tp, _Ref, _Sco, _Storage, false>(__a) {}
+
     _LIBCUDACXX_INLINE_VISIBILITY
     _Tp fetch_add(_Tp __op, memory_order __m = memory_order_seq_cst) volatile _NOEXCEPT
         {return __cxx_atomic_fetch_add(&this->__a_, __op, __m);}
@@ -1457,7 +1454,7 @@ struct __atomic_base : public __atomic_base_ops<_Tp, false, _Sco>  // atomic<T>
     __atomic_base() _NOEXCEPT _LIBCUDACXX_DEFAULT
 
     _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
-    __atomic_base(_Tp __d) _NOEXCEPT : __base_ops{__atomic_storage(__d)} {}
+    __atomic_base(_Tp __d) _NOEXCEPT : __base_ops{{__atomic_storage(__d)}} {}
 
     __atomic_base(const __atomic_base&) = delete;
     __atomic_base& operator=(const __atomic_base&) = delete;
@@ -1479,7 +1476,7 @@ struct __atomic_base<_Tp, true, _Sco> : public __atomic_base_ops<_Tp, true, _Sco
     __atomic_base() _NOEXCEPT = delete;
 
     _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
-    __atomic_base(_Tp& __d) _NOEXCEPT : __base_ops{__atomic_storage(__d)} {}
+    __atomic_base(_Tp& __d) _NOEXCEPT : __base_ops{{__atomic_storage(__d)}} {}
 
     __atomic_base(const __atomic_base&) = default;
     __atomic_base& operator=(const __atomic_base&) = delete;
