@@ -69,7 +69,7 @@ _LIBCUDACXX_BEGIN_NAMESPACE_STD
 template<int _Sco = 0>
 class __latch_base
 {
-    _LIBCUDACXX_LATCH_ALIGNMENT __atomic_base<ptrdiff_t, _Sco> __counter;
+    _LIBCUDACXX_LATCH_ALIGNMENT __atomic_base<ptrdiff_t, false, _Sco> __counter;
 public:
     inline _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR
     explicit __latch_base(ptrdiff_t __expected)

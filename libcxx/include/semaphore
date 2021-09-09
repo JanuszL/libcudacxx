@@ -110,7 +110,7 @@ class __atomic_semaphore_base
             return __old != 0 && __fetch_sub_if_slow(__old);
         }, __rel_time);
     }
-    __atomic_base<ptrdiff_t, _Sco> __count;
+    __atomic_base<ptrdiff_t, false, _Sco> __count;
 
 public:
     _LIBCUDACXX_INLINE_VISIBILITY
@@ -184,7 +184,7 @@ class __atomic_semaphore_base<_Sco, 1> {
             return try_acquire();
         }, __rel_time);
     }
-    __atomic_base<int, _Sco> __available;
+    __atomic_base<int, false, _Sco> __available;
 
 public:
     _LIBCUDACXX_INLINE_VISIBILITY
@@ -323,10 +323,10 @@ class __sem_semaphore_base {
 
     __libcpp_semaphore_t __semaphore;
 #ifndef _LIBCUDACXX_HAS_NO_SEMAPHORE_FRONT_BUFFER
-    __atomic_base<ptrdiff_t, _Sco> __frontbuffer;
+    __atomic_base<ptrdiff_t, false, _Sco> __frontbuffer;
 #endif
 #ifndef _LIBCUDACXX_HAS_NO_SEMAPHORE_BACK_BUFFER
-    __atomic_base<ptrdiff_t, _Sco> __backbuffer;
+    __atomic_base<ptrdiff_t, false, _Sco> __backbuffer;
 #endif
 
 public:

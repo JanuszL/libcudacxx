@@ -78,7 +78,6 @@ const volatile __cxx_atomic_base_impl<_Tp, _Sco>* __cxx_atomic_unwrap(__cxx_atom
 template <typename _Tp, int _Sco>
 struct __cxx_atomic_ref_base_impl {
   using __underlying_t = _Tp;
-  using __load_t = _Tp;
   using __temporary_t = _Tp;
   using __wrap_t = _Tp;
 
