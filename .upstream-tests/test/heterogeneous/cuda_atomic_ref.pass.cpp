@@ -144,6 +144,9 @@ ATOMIC_TESTER(fetch_and);
 ATOMIC_TESTER(fetch_or);
 ATOMIC_TESTER(fetch_xor);
 
+ATOMIC_TESTER(fetch_min);
+ATOMIC_TESTER(fetch_max);
+
 using basic_testers = tester_list<
     store_tester<0>,
     store_tester<-1>,
@@ -161,7 +164,9 @@ using arithmetic_atomic_testers = extend_tester_list<
     basic_testers,
     fetch_add_tester<17, 13, 30>,
     fetch_sub_tester<30, 21, 9>,
-    fetch_sub_tester<9, 17, -8>
+    fetch_min_tester<9, 5, 5>,
+    fetch_max_tester<5, 9, 9>,
+    fetch_sub_tester<9, 17, -8>,
 >;
 
 using bitwise_atomic_testers = extend_tester_list<
