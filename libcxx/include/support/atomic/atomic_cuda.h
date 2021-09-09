@@ -151,6 +151,9 @@ template <typename _Tp, int _Sco>
 struct __cxx_atomic_base_heterogeneous_impl<_Tp, _Sco, true> {
     __cxx_atomic_base_heterogeneous_impl() noexcept = default;
 
+    static_assert(sizeof(_Tp) >= 4, "atomic_ref does not support 1 or 2 byte types");
+    static_assert(sizeof(_Tp) <= 8, "atomic_ref does not support types larger than 8 bytes");
+
     _LIBCUDACXX_INLINE_VISIBILITY _LIBCUDACXX_CONSTEXPR explicit
       __cxx_atomic_base_heterogeneous_impl(_Tp& __value) : __a_value(__value) {
     }
