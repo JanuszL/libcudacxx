@@ -85,7 +85,7 @@ struct __cxx_atomic_ref_base_impl {
 
 #if _GNUC_VER >= 501
     static_assert(is_trivially_copyable<_Tp>::value,
-      "std::atomic<Tp> requires that 'Tp' be a trivially copyable type");
+      "std::atomic_ref<Tp> requires that 'Tp' be a trivially copyable type");
 #endif
 
   _LIBCUDACXX_CONSTEXPR

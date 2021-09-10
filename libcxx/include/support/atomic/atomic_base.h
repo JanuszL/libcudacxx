@@ -85,7 +85,7 @@ inline bool __cxx_atomic_compare_exchange_strong(
     _Tp* __a, _Up* __expected, _Up __value, memory_order __success,
     memory_order __failure) {
   (void)__expected;
-  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a),
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__cxx_atomic_unwrap(__a)),
                                    __expected, &__value, false,
                                    __cxx_atomic_order_to_int(__success),
                                    __cxx_atomic_failure_order_to_int(__failure));
@@ -96,7 +96,7 @@ inline bool __cxx_atomic_compare_exchange_weak(
     _Tp* __a, _Up* __expected, _Up __value, memory_order __success,
     memory_order __failure) {
   (void)__expected;
-  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__a),
+  return __atomic_compare_exchange(__cxx_get_underlying_atomic(__cxx_atomic_unwrap(__a)),
                                    __expected, &__value, true,
                                    __cxx_atomic_order_to_int(__success),
                                    __cxx_atomic_failure_order_to_int(__failure));
